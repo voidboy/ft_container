@@ -10,7 +10,9 @@ namespace ft {
 		public:
 
 		typedef T &								reference;
+		typedef const T &						const_reference;
 		typedef T *								pointer;
+		typedef const T *						const_pointer;
 		typedef T								value_type;
 		typedef ptrdiff_t						difference_type;
 		typedef node<T> 						Node;
@@ -22,10 +24,10 @@ namespace ft {
 		explicit RBtree_iterator(const RBtree_iterator & n);
 		template <typename Type>
 		RBtree_iterator(const RBtree_iterator<Type> & n);
-		T & operator*(); 
-		T & operator*() const; 
+		reference operator*(); 
+		const_reference operator*() const;
 		pointer operator->(); 
-		pointer operator->() const;
+		const_pointer operator->() const; 
 		RBtree_iterator operator++(int);
 		RBtree_iterator operator++();
 		RBtree_iterator operator--(int);
@@ -70,18 +72,24 @@ namespace ft {
 		;
 	}
 
-	_T_RBtree_iterator T & RBtree_iterator<T>::operator*() { return current_node->val; }
-
-	_T_RBtree_iterator T & RBtree_iterator<T>::operator*() const { return current_node->val; }
-
-	_T_RBtree_iterator T * RBtree_iterator<T>::operator->() 
+	_T_RBtree_iterator typename RBtree_iterator<T>::reference RBtree_iterator<T>::operator*() 
 	{ 
-		return std::__addressof(current_node->val);
+		return current_node->val; 
 	}
 
-	_T_RBtree_iterator T * RBtree_iterator<T>::operator->() const 
+	_T_RBtree_iterator typename RBtree_iterator<T>::const_reference RBtree_iterator<T>::operator*() const
 	{ 
-		return std::__addressof(current_node->val);
+		return current_node->val; 
+	}
+
+	_T_RBtree_iterator typename RBtree_iterator<T>::pointer RBtree_iterator<T>::operator->() 
+	{ 
+		return std::addressof(current_node->val);
+	}
+
+	_T_RBtree_iterator typename RBtree_iterator<T>::const_pointer RBtree_iterator<T>::operator->() const
+	{ 
+		return std::addressof(current_node->val);
 	}
 
 	_T_RBtree_iterator RBtree_iterator<T> RBtree_iterator<T>::operator++(int) 
