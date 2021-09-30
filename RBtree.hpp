@@ -63,7 +63,7 @@ namespace ft {
 	ft::pair<iterator, bool> add_node(const T & v);
 	size_type del_node(Node * found);
 	size_type del_node(const T & v);
-	void del_node(iterator first, iterator last);
+	void del_node(const_iterator first, const_iterator last);
 	void postfix(Node * root, void (RBtree::*f)(Node *));
 	RBtree & operator=(const RBtree & rhs);
 	void swap(RBtree & ref);
@@ -267,12 +267,12 @@ namespace ft {
 		return del_node(search_node(v)); 
 	}
 
-	_T_RBtree void _S_RBtree::del_node(typename _S_RBtree::iterator first, typename _S_RBtree::iterator last)
+	_T_RBtree void _S_RBtree::del_node(typename _S_RBtree::const_iterator first, typename _S_RBtree::const_iterator last)
 	{
 		Node * d;
 		while (first != last)
 		{
-			d = first.base();
+			d = const_cast<Node *>(first.base());
 			first++;
 			del_node(d);
 		}
@@ -432,7 +432,7 @@ namespace ft {
 				return in_order_successor(current);
 			else 
 			{
-				while (current->parent != this->NIL)
+				while (current != this->NIL)
 				{
 					if (comp(key, current->val))
 						return iterator(current);
@@ -483,7 +483,7 @@ namespace ft {
 				return in_order_successor(current);
 			else 
 			{
-				while (current->parent != this->NIL)
+				while (current != this->NIL)
 				{
 					if (comp(key, current->val))
 						return const_iterator(current);

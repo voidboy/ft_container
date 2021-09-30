@@ -29,9 +29,9 @@ namespace ft {
 		pointer operator->(); 
 		const_pointer operator->() const; 
 		RBtree_iterator operator++(int);
-		RBtree_iterator operator++();
+		RBtree_iterator & operator++();
 		RBtree_iterator operator--(int);
-		RBtree_iterator operator--();
+		RBtree_iterator & operator--();
 		RBtree_iterator operator-(const difference_type & n);
 		RBtree_iterator operator+(const difference_type & n);
 		RBtree_iterator & operator=(const RBtree_iterator & rhs);
@@ -96,6 +96,8 @@ namespace ft {
 	{
 		RBtree_iterator old(*this);
 
+		if (current_node->is_nill_node())
+			return old;
 		if (current_node->right->is_nill_node())
 		{
 			if (current_node == current_node->parent->right)
@@ -116,7 +118,7 @@ namespace ft {
 		return old;
 	}
 
-	_T_RBtree_iterator RBtree_iterator<T> RBtree_iterator<T>::operator++() 
+	_T_RBtree_iterator RBtree_iterator<T> & RBtree_iterator<T>::operator++() 
 	{
 		(*this)++;
 		return (*this);
@@ -148,7 +150,7 @@ namespace ft {
 		return old;
 	}
 
-	_T_RBtree_iterator RBtree_iterator<T> RBtree_iterator<T>::operator--() 
+	_T_RBtree_iterator RBtree_iterator<T> & RBtree_iterator<T>::operator--() 
 	{
 		(*this)--;
 		return (*this);

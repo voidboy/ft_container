@@ -28,9 +28,9 @@ namespace ft {
 		reference operator*() const;
 		pointer operator->() const; 
 		RBtree_const_iterator operator++(int);
-		RBtree_const_iterator operator++();
+		RBtree_const_iterator & operator++();
 		RBtree_const_iterator operator--(int);
-		RBtree_const_iterator operator--();
+		RBtree_const_iterator & operator--();
 		RBtree_const_iterator operator-(const difference_type & n);
 		RBtree_const_iterator operator+(const difference_type & n);
 		RBtree_const_iterator & operator=(const RBtree_const_iterator & rhs);
@@ -112,7 +112,7 @@ namespace ft {
 		return old;
 	}
 
-	_T_RBtree_const_iterator RBtree_const_iterator<T> RBtree_const_iterator<T>::operator++() 
+	_T_RBtree_const_iterator RBtree_const_iterator<T> & RBtree_const_iterator<T>::operator++() 
 	{
 		(*this)++;
 		return (*this);
@@ -144,7 +144,7 @@ namespace ft {
 		return old;
 	}
 
-	_T_RBtree_const_iterator RBtree_const_iterator<T> RBtree_const_iterator<T>::operator--() 
+	_T_RBtree_const_iterator RBtree_const_iterator<T> & RBtree_const_iterator<T>::operator--() 
 	{
 		(*this)--;
 		return (*this);

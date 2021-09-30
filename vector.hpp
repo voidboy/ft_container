@@ -285,18 +285,12 @@ namespace ft {
 
 	_T_vector typename _S_vector::iterator _S_vector::erase(typename _S_vector::iterator position)
 	{
-		iterator next = position + 1;
-		if (next == this->end())
-			this->pool.destroy(this->C);
-		else
-		{
-			size_type i = 0;
-			for (; next + i != this->end(); i++)
-				position[i] = next[i];
-			this->pool.destroy(next.base() + --i);
-		}
+		if (position + 1 != this->end())
+			for (size_type i = 0; position + i != this->end(); i++)
+				position[i] = position[i + 1];
+		this->pool.destroy(this->end().base() - 1);
 		this->_size--;
-		return next;
+		return position;
 	}
 
 	_T_vector typename _S_vector::iterator _S_vector::erase(typename _S_vector::iterator first,
@@ -304,11 +298,12 @@ namespace ft {
 	{
 		iterator end = this->end();
 		this->_size -= std::distance(first, last);
-		for (size_type i = 0; last + i != end;)
-			*first++ = *(last.base() + i++);
-		while (first != end)
-			this->pool.destroy(first++.base());
-		return (last + 1);
+		size_type i = 0;
+		for (; last + i != end; i++)
+			first[i] = *(last.base() + i);
+		for (; first + i != this->end(); i++)
+			this->pool.destroy(first.base() + i);
+		return (first);
 	}
 
 	_T_vector void _S_vector::clear() 
@@ -407,7 +402,7 @@ namespace ft {
 			{
 				iterator	it = this->begin();
 				size_type	i;
-				size_type	new_size = this->_size + n; 
+				size_type	new_size = n < this->_size * 2 ? this->_size * 2 : n; 
 				T *			tmp = this->pool.allocate(new_size);
 				for (i = 0; it + i != position; i++)
 				{
@@ -469,7 +464,11 @@ namespace ft {
 			{
 				iterator	it = this->begin();
 				size_type	i;
-				size_type	new_size = this->_size + n;
+				size_type	new_size;
+				if (this->size * 2 > this->max_size())
+					new_size = this->max_size();
+				else 
+					new_size = n < this->_size * 2 ? this->_size * 2 : n; 
 				T *			tmp = this->pool.allocate(new_size);
 				for (i = 0; it + i != position; i++)
 				{

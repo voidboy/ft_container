@@ -109,9 +109,9 @@ namespace ft {
 	}
 
 	_T_map _S_map::map(const _S_map & x) : 
-		tree(x.tree)
+		tree(x.key_comp(), x.get_allocator())
 	{
-		;
+		insert(x.begin(), x.end());
 	}
 
 	_T_map _S_map & _S_map::operator=(const _S_map & x)

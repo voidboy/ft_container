@@ -25,10 +25,10 @@ namespace ft {
 			typedef std::size_t 								size_type;
 			typedef std::ptrdiff_t								difference_type;
 
-			typedef typename _RBtree::iterator 					iterator;
+			typedef typename _RBtree::const_iterator 					iterator;
 			typedef typename _RBtree::const_iterator 					const_iterator;
 
-			typedef typename _RBtree::reverse_iterator					reverse_iterator;
+			typedef typename _RBtree::const_reverse_iterator				reverse_iterator;
 			typedef typename _RBtree::const_reverse_iterator				const_reverse_iterator;
 
 			class value_compare : std::binary_function<value_type, value_type, bool>
