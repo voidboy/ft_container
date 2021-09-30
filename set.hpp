@@ -75,9 +75,12 @@ namespace ft {
 			value_compare value_comp() const;
 			iterator find(const value_type & k) const;
 			size_type count(const key_type & k) const;
-			iterator lower_bound(const value_type & k) const;
-			iterator upper_bound(const value_type & k) const;
-			ft::pair<iterator, iterator> equal_range(const key_type & k) const;
+			iterator lower_bound(const value_type & k);
+			const_iterator lower_bound(const value_type & k) const;
+			iterator upper_bound(const value_type & k);
+			const_iterator upper_bound(const value_type & k) const;
+			ft::pair<iterator, iterator> equal_range(const key_type & k);
+			ft::pair<const_iterator, const_iterator> equal_range(const key_type & k) const;
 			allocator_type get_allocator() const; 
 
 		private:
@@ -205,20 +208,36 @@ namespace ft {
 		return this->tree.count(k);
 	}
 
-	_T_set typename _S_set::iterator _S_set::lower_bound(const typename _S_set::value_type & k) const 
+	_T_set typename _S_set::iterator _S_set::lower_bound(const typename _S_set::value_type & k) 
 	{
 		return this->tree.lower_bound(k);
 	}
 
-	_T_set typename _S_set::iterator _S_set::upper_bound(const typename _S_set::value_type & k) const
+	_T_set typename _S_set::const_iterator _S_set::lower_bound(const typename _S_set::value_type & k) const 
+	{
+		return this->tree.lower_bound(k);
+	}
+
+	_T_set typename _S_set::iterator _S_set::upper_bound(const typename _S_set::value_type & k) 
+	{
+		return this->tree.upper_bound(k);
+	}
+
+	_T_set typename _S_set::const_iterator _S_set::upper_bound(const typename _S_set::value_type & k) const
 	{
 		return this->tree.upper_bound(k);
 	}
 
 	_T_set ft::pair<typename _S_set::iterator, typename _S_set::iterator> 
-	_S_set::equal_range(const typename _S_set::key_type & k) const
+	_S_set::equal_range(const typename _S_set::key_type & k) 
 	{
 		return pair<typename _S_set::iterator, typename _S_set::iterator>(lower_bound(k), upper_bound(k));
+	}
+
+	_T_set ft::pair<typename _S_set::const_iterator, typename _S_set::const_iterator> 
+	_S_set::equal_range(const typename _S_set::key_type & k) const
+	{
+		return pair<typename _S_set::const_iterator, typename _S_set::const_iterator>(lower_bound(k), upper_bound(k));
 	}
 
 	_T_set typename _S_set::allocator_type _S_set::get_allocator() const { return this->tree.get_allocator(); }
@@ -226,6 +245,8 @@ namespace ft {
 	template <class T, class Compare, class Alloc>
 	bool operator==(const set<T,Compare,Alloc>& lhs, const set<T,Compare,Alloc>& rhs)
 	{
+		if (lhs.size() != rhs.size())
+			return false;
 		return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 

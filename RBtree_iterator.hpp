@@ -67,7 +67,7 @@ namespace ft {
 
 	_T_RBtree_iterator template <typename Type>
 	RBtree_iterator<T>::RBtree_iterator(const RBtree_iterator<Type> & n) : 
-		current_node(reinterpret_cast<ptrNode>(n.base()))
+		current_node(n.base())
 	{
 		;
 	}

@@ -83,8 +83,9 @@ namespace ft {
 			iterator lower_bound(const key_type & k);
 			const_iterator lower_bound(const key_type & k) const;
 			iterator upper_bound(const key_type & k);
-			iterator upper_bound(const key_type & k) const;
+			const_iterator upper_bound(const key_type & k) const;
 			ft::pair<iterator, iterator> equal_range(const key_type & k);
+			ft::pair<const_iterator, const_iterator> equal_range(const key_type & k) const;
 			allocator_type get_allocator() const;
 
 		private:
@@ -108,9 +109,9 @@ namespace ft {
 	}
 
 	_T_map _S_map::map(const _S_map & x) : 
-		tree(x.key_comp(), x.get_allocator())
+		tree(x.tree)
 	{
-		insert(x.begin(), x.end());
+		;
 	}
 
 	_T_map _S_map & _S_map::operator=(const _S_map & x)
@@ -221,7 +222,7 @@ namespace ft {
 		return this->tree.upper_bound(ft::pair<key_type, mapped_type>(k, mapped_type()));
 	}
 
-	_T_map typename _S_map::iterator _S_map::upper_bound(const typename _S_map::key_type & k) const
+	_T_map typename _S_map::const_iterator _S_map::upper_bound(const typename _S_map::key_type & k) const
 	{
 		return this->tree.upper_bound(ft::pair<key_type, mapped_type>(k, mapped_type()));
 	}
@@ -232,11 +233,19 @@ namespace ft {
 		return pair<iterator, iterator>(lower_bound(k), upper_bound(k));
 	}
 
+	_T_map ft::pair<typename _S_map::const_iterator, typename _S_map::const_iterator> 
+	_S_map::equal_range(const typename _S_map::key_type & k) const
+	{
+		return pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
+	}
+
 	_T_map typename _S_map::allocator_type _S_map::get_allocator() const { return this->tree.get_allocator(); }
 
 	template <typename Key, typename T, typename Compare, typename Alloc>
 	bool operator==(const map<Key, T,Compare,Alloc>& lhs, const map<Key, T,Compare,Alloc>& rhs)
 	{
+		if (lhs.size() != rhs.size())
+			return false;
 		return std::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 

@@ -24,7 +24,7 @@ namespace ft {
 		node(const node<perlinpinpin> & n);
 		template <typename perlinpinpin>
 		node(const node<perlinpinpin> * & n);
-		bool is_nill_node(void);
+		bool is_nill_node(void) const;
 		void set_child(dir d, node * v);
 		node * child(dir d);
 		node * grand_parent(void);
@@ -81,7 +81,7 @@ namespace ft {
 	}
 
 
-	_T_node bool node<T>::is_nill_node(void) 
+	_T_node bool node<T>::is_nill_node(void) const 
 	{ 
 		return (this->right == NULL && this->left == NULL); 
 	}

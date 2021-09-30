@@ -6,6 +6,7 @@
 #include "pair.hpp"
 #include "compare.hpp"
 #include "RBtree_iterator.hpp"
+#include "RBtree_const_iterator.hpp"
 #include "reverse_iterator.hpp"
 #define _T_RBtree template <typename T, typename Compare, typename Alloc>
 #define _S_RBtree RBtree<T, Compare, Alloc>
@@ -27,10 +28,10 @@ namespace ft {
 	typedef typename allocator_type::size_type					size_type;
 
 	typedef RBtree_iterator<T>									iterator;
-	typedef RBtree_iterator<const T>							const_iterator;
+	typedef RBtree_const_iterator<T>							const_iterator;
 
-	typedef ft::reverse_iterator<iterator>				reverse_iterator;
-	typedef ft::reverse_iterator<const_iterator>			const_reverse_iterator;
+	typedef ft::reverse_iterator<iterator>						reverse_iterator;
+	typedef ft::reverse_iterator<const_iterator>				const_reverse_iterator;
 
 	private:
 
@@ -69,8 +70,10 @@ namespace ft {
 	iterator find(const T & v) const;
 	size_type count(const T & k) const ;
 	void clear(void);
-	iterator lower_bound(const T & key) const;
-	iterator upper_bound(const T & key) const;
+	iterator lower_bound(const T & key);
+	const_iterator lower_bound(const T & key) const;
+	iterator upper_bound(const T & key);
+	const_iterator upper_bound(const T & key) const;
 
 	private: 
 
@@ -97,7 +100,10 @@ namespace ft {
 
 	_T_RBtree typename _S_RBtree::iterator _S_RBtree::begin(void) { return iterator(MINIMUM()); }
 
-	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::begin(void) const { return iterator(MINIMUM()); }
+	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::begin(void) const 
+	{ 
+		return const_iterator(MINIMUM()); 
+	}
 
 	_T_RBtree typename _S_RBtree::reverse_iterator _S_RBtree::rbegin(void) { return reverse_iterator(this->end()); }
 
@@ -105,7 +111,10 @@ namespace ft {
 
 	_T_RBtree typename _S_RBtree::iterator _S_RBtree::end(void) { return iterator(this->NIL); }
 
-	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::end(void) const { return iterator(this->NIL); }
+	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::end(void) const 
+	{ 
+		return const_iterator(this->NIL); 
+	}
 
 	_T_RBtree typename _S_RBtree::reverse_iterator _S_RBtree::rend(void) { return reverse_iterator(this->begin()); }
 
@@ -197,6 +206,7 @@ namespace ft {
 			new_node = this->root;
 		}
 		this->size++;
+		this->NIL->parent = last;
 		if (!last)
 			this->NIL->parent = MAXIMUM();
 		else if (comp(last->val, v))
@@ -241,11 +251,12 @@ namespace ft {
 				tmp->c = found->c;
 			}
 			this->size--;
-			if (found == last)
-				this->NIL->parent = found->parent;
-			delete_node(found);
 			if (tmpc == BLACK)
 				fix_del_node(bak);
+			this->NIL->parent = last;
+			if (found == last)
+				this->NIL->parent = MAXIMUM();
+			delete_node(found);
 			return size_type(1);
 		}
 		return size_type(0);
@@ -279,8 +290,12 @@ namespace ft {
 
 	_T_RBtree _S_RBtree & _S_RBtree::operator=(const _S_RBtree & rhs)
 	{
-		iterator it = rhs.begin();
+		if (this == std::addressof(rhs))
+			return (*this);
+		const_iterator it = rhs.begin();
 		this->clear();
+		this->comp = rhs.comp;
+		this->pool = rhs.pool;
 		while (it != rhs.end())
 			this->add_node(*it++);
 		return (*this);
@@ -311,7 +326,7 @@ namespace ft {
 		this->del_node(this->begin(), this->end()); 
 	}
 
-	_T_RBtree typename _S_RBtree::iterator _S_RBtree::lower_bound(const T & key) const
+	_T_RBtree typename _S_RBtree::iterator _S_RBtree::lower_bound(const T & key) 
 	{
 		Node * found = search_node(key);
 		Node * last = this->NIL;
@@ -344,7 +359,40 @@ namespace ft {
 		}
 	}
 
-	_T_RBtree typename _S_RBtree::iterator _S_RBtree::upper_bound(const T & key) const
+	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::lower_bound(const T & key) const
+	{
+		Node * found = search_node(key);
+		Node * last = this->NIL;
+
+		if (found && found != this->NIL)
+			return const_iterator(found);
+		else
+		{
+			Node * current = this->root;
+			while (1)
+			{
+				/* key < current->val */
+				if (comp(key, current->val))
+					last = current;
+				if (comp(key, current->val))
+				{
+					if (current->left == this->NIL)
+						break ;
+					current = current->left;
+				}
+				else 
+				{
+					if (current->right == this->NIL)
+						break;
+					current = current->right;
+				}
+				
+			}
+			return const_iterator(last);
+		}
+	}
+
+	_T_RBtree typename _S_RBtree::iterator _S_RBtree::upper_bound(const T & key) 
 	{
 		Node * found = search_node(key);
 
@@ -388,6 +436,57 @@ namespace ft {
 				{
 					if (comp(key, current->val))
 						return iterator(current);
+					current = current->parent;
+				}
+			}
+			return this->end();
+		}
+	}
+
+	_T_RBtree typename _S_RBtree::const_iterator _S_RBtree::upper_bound(const T & key) const
+	{
+		Node * found = search_node(key);
+
+		if (found && found != this->NIL)
+		{
+			if (found->right != this->NIL)
+				return in_order_successor(found);
+			while (found->parent != this->NIL)
+			{
+				if (comp(key, found->val))
+					return iterator(found);
+				found = found->parent;
+			}
+			return this->end();
+		}
+		else
+		{
+			Node * current = this->root;
+			while (1)
+			{
+				if (comp(key, current->val))
+				{
+					if (current->left != this->NIL)
+						current = current->left;
+					else 
+						return const_iterator(current);
+				}
+				else 
+				{
+					if (current->right != this->NIL)
+						current = current->right;
+					else
+						break ;
+				}
+			}
+			if (current->right != this->NIL)
+				return in_order_successor(current);
+			else 
+			{
+				while (current->parent != this->NIL)
+				{
+					if (comp(key, current->val))
+						return const_iterator(current);
 					current = current->parent;
 				}
 			}
