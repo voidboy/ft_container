@@ -81,7 +81,7 @@ namespace ft {
 		private:
 
 			void __clear_nd_resize(size_type n);
-			void __resize_nd_fill(size_type n, value_type val = value_type());
+			void __resize_nd_fill(size_type n, size_type c, value_type val = value_type());
 			void __yycopy(vector const & ref);
 			void __insert_dispatch(iterator position, size_type n, const value_type& val, true_type);
 			template <class InputIterator>
@@ -180,7 +180,14 @@ namespace ft {
 		else if (n > this->_size)
 		{
 			if (n > this->_capacity)
-				__resize_nd_fill(n, val);
+			{
+				if (this->_capacity * 2 > this->max_size())
+					__resize_nd_fill(n, this->max_size(), val);
+				else if (n > this->_capacity * 2)
+					__resize_nd_fill(n, n, val);
+				else 
+					__resize_nd_fill(n, this->_capacity * 2, val);
+			}
 			else
 				for (size_type i = this->_size; i < n; i++)
 					this->pool.construct(this->C + i, val);	
@@ -257,7 +264,14 @@ namespace ft {
 			}
 			else 
 			{
-				T * tmp = this->pool.allocate(this->_capacity * 2);
+				size_type	new_size;
+				if (this->_capacity * 2 > this->max_size())
+					new_size = this->max_size();
+				else if (this->_capacity * 2  < 1 + this->_size)
+					new_size = 1 + this->_size;
+				else 
+					new_size = this->_capacity * 2;
+				T * tmp = this->pool.allocate(new_size);
 				for (size_type i = 0; i < this->_size; i++)
 				{
 					this->pool.construct(tmp + i, (*this)[i]);
@@ -266,7 +280,7 @@ namespace ft {
 				this->pool.construct(tmp + this->_size, val);	
 				this->pool.deallocate(this->C, this->_capacity);
 				this->C = tmp;
-				this->_capacity *= 2;
+				this->_capacity = new_size;
 			}
 		}
 		else
@@ -332,16 +346,16 @@ namespace ft {
 	}
 
 	_T_vector void _S_vector::__resize_nd_fill(typename _S_vector::size_type n, 
-			typename _S_vector::value_type val)
+			typename _S_vector::size_type c, typename _S_vector::value_type val)
 	{
-		T * tmp = this->pool.allocate(n);
+		T * tmp = this->pool.allocate(c);
 		for (size_type i = 0; i < this->_size; i++)
 			tmp[i] = (*this)[i];
 		for (size_type i = this->_size; i < n; i++)
 			this->pool.construct(tmp + i, val);	
 		this->pool.deallocate(this->C, this->_capacity);
 		this->C = tmp;
-		this->_capacity = n;
+		this->_capacity = c;
 		this->_size = n;
 	}
 
@@ -363,64 +377,62 @@ namespace ft {
 		return iterator(this->C + n);
 	}
 
+
 	_T_vector void _S_vector::__insert_dispatch(typename _S_vector::iterator position,
 			typename _S_vector::size_type n, const typename _S_vector::value_type & val, true_type)
 	{
-		if (position == this->end())
-			while (n--)
-				this->push_back(val);
+		if (this->_size + n <= this->_capacity)
+		{
+			iterator back = this->end() - 1 + n;
+			iterator copy = this->end() - 1;
+			while (copy >= position)
+			{
+				if (back >= this->end())
+					this->pool.construct(back.base(), *copy);
+				else
+					*back = *copy;
+				--back;
+				--copy;
+			}
+			size_type save_n = n;
+			while (save_n--)
+			{
+				if (position >= this->end())
+					this->pool.construct(position.base(), val);
+				else
+					*position = val;
+				++position;
+			}
+			this->_size += n;
+		}
 		else
 		{
-			if (this->_size + n < this->_capacity)
+			iterator	it = this->begin();
+			size_type	i;
+			size_type	new_capacity;
+			if (this->_capacity * 2 > this->max_size())
+				new_capacity = this->max_size();
+			else if (this->_capacity * 2 < this->_size + n)
+				new_capacity = this->_size + n;
+			else 
+				new_capacity = this->_capacity * 2;
+			T *	tmp = this->pool.allocate(new_capacity);
+			for (i = 0; it + i != position; i++)
 			{
-				if (this->_size + n < this->_capacity)
-				{
-					iterator back = this->end() - 1 + n;
-					iterator copy = this->end() - 1;
-					while (copy >= position)
-					{
-						if (back >= this->end())
-							this->pool.construct(back.base(), *copy);
-						else 
-							*back = *copy;
-						--back;
-						--copy;
-					}
-					size_type save_n = n;
-					while (save_n--)
-					{
-						if (position >= this->end())
-							this->pool.construct(position.base(), val);
-						else 
-							*position = val;
-						++position;
-					}
-					this->_size += n;
-				}
+				this->pool.construct(tmp + i, it[i]);
+				this->pool.destroy(it.base() + i);
 			}
-			else
+			for (size_type j = n; j > 0; j--)
+				this->pool.construct(tmp + i++, val);
+			for (; it + i - n != this->end(); i++)
 			{
-				iterator	it = this->begin();
-				size_type	i;
-				size_type	new_size = n < this->_size * 2 ? this->_size * 2 : n; 
-				T *			tmp = this->pool.allocate(new_size);
-				for (i = 0; it + i != position; i++)
-				{
-					this->pool.construct(tmp + i, it[i]);
-					this->pool.destroy(it.base() + i);
-				}
-				for (size_type j = n; j > 0; j--)
-					this->pool.construct(tmp + i++, val);
-				for (; it + i - n != this->end(); i++)
-				{
-					this->pool.construct(tmp + i, it[i - n]);
-					this->pool.destroy(it.base() + i - n);
-				}
-				this->pool.deallocate(this->C, this->_capacity);
-				this->C = tmp;
-				this->_size = this->_size + n;
-				this->_capacity = new_size;
+				this->pool.construct(tmp + i, it[i - n]);
+				this->pool.destroy(it.base() + i - n);
 			}
+			this->pool.deallocate(this->C, this->_capacity);
+			this->C = tmp;
+			this->_size = this->_size + n;
+			this->_capacity = new_capacity;
 		}
 	}
 
@@ -430,63 +442,59 @@ namespace ft {
 	{
 		if (first == last)
 			return ;
-		else if (position == this->end())
-			while (first != last)
-				this->push_back(*first++);
-		else 
+		size_type n = std::distance(first, last);
+		if (this->_size + n <= this->_capacity)
 		{
-			size_type n = std::distance(first, last);
-			if (this->_size + n < this->_capacity)
+			iterator back = this->end() - 1 + n;
+			iterator copy = this->end() - 1;
+			while (copy >= position)
 			{
-				iterator back = this->end() - 1 + n;
-				iterator copy = this->end() - 1;
-				while (copy >= position)
-				{
-					if (back >= this->end())
-						this->pool.construct(back.base(), *copy);
-					else 
-						*back = *copy;
-					--back;
-					--copy;
-				}
-				while (first != last)
-				{
-					if (position >= this->end())
-						this->pool.construct(position.base(), *first);
-					else 
-						*position = *first;
-					++first;
-					++position;
-				}
-				this->_size += n;
+				if (back >= this->end())
+					this->pool.construct(back.base(), *copy);
+				else
+					*back = *copy;
+				--back;
+				--copy;
 			}
-			else
+			while (first != last)
 			{
-				iterator	it = this->begin();
-				size_type	i;
-				size_type	new_size;
-				if (this->size * 2 > this->max_size())
-					new_size = this->max_size();
-				else 
-					new_size = n < this->_size * 2 ? this->_size * 2 : n; 
-				T *			tmp = this->pool.allocate(new_size);
-				for (i = 0; it + i != position; i++)
-				{
-					this->pool.construct(tmp + i, it[i]);
-					this->pool.destroy(it.base() + i);
-				}
-				while (first != last)
-					this->pool.construct(tmp + i++, *first++);
-				for (; it + i - n != this->end(); i++)
-				{
-					this->pool.construct(tmp + i, it[i - n]);
-					this->pool.destroy(it.base() + i - n);
-				}
-				this->pool.deallocate(this->C, this->_capacity);
-				this->C = tmp;
-				this->_size = this->_size + n;
-				this->_capacity = new_size;
+				if (position >= this->end())
+					this->pool.construct(position.base(), *first);
+				else
+					*position = *first;
+				++first;
+				++position;
 			}
+			this->_size += n;
+		}
+		else
+		{
+			iterator	it = this->begin();
+			size_type	i;
+			size_type	new_capacity;
+			if (this->_capacity * 2 > this->max_size())
+				new_capacity = this->max_size();
+			else if (this->_capacity * 2 < this->_size + n)
+				new_capacity = this->_size + n;
+			else 
+				new_capacity = this->_capacity * 2;
+			T *	tmp = this->pool.allocate(new_capacity);
+			for (i = 0; it + i != position; i++)
+			{
+				this->pool.construct(tmp + i, it[i]);
+				this->pool.destroy(it.base() + i);
+			}
+			while (first != last)
+				this->pool.construct(tmp + i++, *first++);
+			for (; it + i - n != this->end(); i++)
+			{
+				this->pool.construct(tmp + i, it[i - n]);
+				this->pool.destroy(it.base() + i - n);
+			}
+			this->pool.deallocate(this->C, this->_capacity);
+			this->C = tmp;
+			this->_size = this->_size + n;
+			this->_capacity = new_capacity;
 		}
 	}
 
