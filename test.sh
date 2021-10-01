@@ -1,0 +1,27 @@
+#!/bin/bash
+echo TESTOR1
+sleep 5
+cd testor1
+make vector
+make stack
+make map
+make set
+make fclean
+echo "----------------------------------------"
+echo TESTOR2
+sleep 5
+cd ../testor2
+./test.sh vector
+./test.sh stack
+./test.sh map
+./test.sh set
+./test.sh clean
+echo "----------------------------------------"
+echo TESTOR3
+sleep 5
+cd ../testor3
+./do.sh vector
+./do.sh stack
+./do.sh map
+./do.sh set
+./test.sh clean
