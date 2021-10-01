@@ -184,7 +184,7 @@ namespace ft {
 		tree.del_node(first, last); 
 	}
 
-	_T_set void _S_set::swap(set & x) 
+	_T_set void _S_set::swap(_S_set & x) 
 	{ 
 		this->tree.swap(x.tree);
 	}
@@ -278,5 +278,11 @@ namespace ft {
  	bool operator>=(const set<T,Compare,Alloc>& lhs, const set<T,Compare,Alloc>& rhs)
 	{
 		return !(lhs < rhs);
+	}
+
+	template <class T, class Compare, class Alloc>
+ 	void swap(set<T,Compare,Alloc>& x, set<T,Compare,Alloc>& y)
+	{
+		x.swap(y);
 	}
 }

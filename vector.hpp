@@ -148,6 +148,8 @@ namespace ft {
 
 	_T_vector _S_vector & _S_vector::operator=(const _S_vector & x)
 	{
+		if (*this == x)
+			return (*this);
 		this->assign(x.begin(), x.end());
 		return (*this);
 	}
@@ -162,11 +164,17 @@ namespace ft {
 
 	_T_vector typename _S_vector::reverse_iterator _S_vector::rbegin(void) { return reverse_iterator(this->end()); }
 
-	_T_vector typename _S_vector::const_reverse_iterator _S_vector::rbegin(void) const { return reverse_iterator(this->end()); }
+	_T_vector typename _S_vector::const_reverse_iterator _S_vector::rbegin(void) const 
+	{ 
+		return const_reverse_iterator(this->end()); 
+	}
 
 	_T_vector typename _S_vector::reverse_iterator _S_vector::rend(void) { return reverse_iterator(this->begin()); }
 
-	_T_vector typename _S_vector::const_reverse_iterator _S_vector::rend(void) const { return reverse_iterator(this->begin()); }
+	_T_vector typename _S_vector::const_reverse_iterator _S_vector::rend(void) const 
+	{ 
+		return const_reverse_iterator(this->begin()); 
+	}
 
 	_T_vector typename _S_vector::size_type _S_vector::size(void) const { return this->_size; }
 

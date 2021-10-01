@@ -19,7 +19,7 @@ namespace ft {
 		typedef typename it::difference_type	difference_type;
 
 			vector_iterator();
-			vector_iterator(const pointer & x);
+			explicit vector_iterator(const pointer & x);
 			template <class iter>
 			vector_iterator(const vector_iterator<iter> & x);
 
@@ -38,7 +38,7 @@ namespace ft {
 			reference operator*() const;
 			vector_iterator operator-(const difference_type & n);
 			vector_iterator operator+(const difference_type & n);
-			const _Pointer & base(void) const;
+			_Pointer base(void) const;
 
 		private:
 
@@ -125,7 +125,7 @@ namespace ft {
 		return (*this);
 	}
 
-	_T_vi const _Pointer & _S_vi::base(void) const { return p; }
+	_T_vi _Pointer _S_vi::base(void) const { return p; }
 
 	template <typename _Iterator1, typename _Iterator2>
 	bool operator<(const vector_iterator<_Iterator1> & lhs, const vector_iterator<_Iterator2> & rhs) 
@@ -153,7 +153,7 @@ namespace ft {
 
 	template <typename _Iterator>
 	vector_iterator<_Iterator> operator+(const typename vector_iterator<_Iterator>::difference_type & lhs,
-			const vector_iterator<_Iterator> & rhs) { return rhs.base() + lhs; }
+			const vector_iterator<_Iterator> & rhs) { return vector_iterator<_Iterator>(rhs.base() + lhs); }
 
 	template <typename _Iterator1, typename _Iterator2>
 	bool operator==(const vector_iterator<_Iterator1> & lhs, const vector_iterator<_Iterator2> & rhs) 

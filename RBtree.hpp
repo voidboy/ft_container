@@ -107,7 +107,10 @@ namespace ft {
 
 	_T_RBtree typename _S_RBtree::reverse_iterator _S_RBtree::rbegin(void) { return reverse_iterator(this->end()); }
 
-	_T_RBtree typename _S_RBtree::const_reverse_iterator _S_RBtree::rbegin(void) const { return reverse_iterator(this->end()); }
+	_T_RBtree typename _S_RBtree::const_reverse_iterator _S_RBtree::rbegin(void) const 
+	{ 
+		return const_reverse_iterator(this->end()); 
+	}
 
 	_T_RBtree typename _S_RBtree::iterator _S_RBtree::end(void) { return iterator(this->NIL); }
 
@@ -118,7 +121,10 @@ namespace ft {
 
 	_T_RBtree typename _S_RBtree::reverse_iterator _S_RBtree::rend(void) { return reverse_iterator(this->begin()); }
 
-	_T_RBtree typename _S_RBtree::const_reverse_iterator _S_RBtree::rend(void) const { return reverse_iterator(this->begin()); }
+	_T_RBtree typename _S_RBtree::const_reverse_iterator _S_RBtree::rend(void) const 
+	{ 
+		return const_reverse_iterator(this->begin()); 
+	}
 
 	_T_RBtree _S_RBtree::RBtree(const Compare & fcntl,
 			const typename _S_RBtree::allocator_type & alloc) : 
